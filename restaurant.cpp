@@ -87,6 +87,7 @@ void simulate(string filename, restaurant *r)
     int count;
     bool merge = false;
     int merge_num = 0;
+    int merge_id = 0;
 
     // Queue
     restaurant *queue = new restaurant();
@@ -187,10 +188,13 @@ void simulate(string filename, restaurant *r)
             int i = 1;
             int j = 0;
             table *currAvailSeat = new table(0, "", 0, NULL);
-            
-            while(i <= MAXSIZE){
-                if (j == stoi(arr[3])){
-                    if (tmp->ID > currAvailSeat->ID){
+
+            while (i <= MAXSIZE)
+            {
+                if (j == stoi(arr[3]))
+                {
+                    if (tmp->ID > currAvailSeat->ID)
+                    {
                         currAvailSeat = tmp;
                     }
                     tmp = tmp->next;
@@ -198,12 +202,15 @@ void simulate(string filename, restaurant *r)
                     pos = tmp;
                     j = 0;
                 }
-                else{
-                    if (pos->name == ""){
+                else
+                {
+                    if (pos->name == "")
+                    {
                         pos = pos->next;
                         j++;
                     }
-                    else{
+                    else
+                    {
                         tmp = tmp->next;
                         i++;
                         pos = tmp;
@@ -212,21 +219,74 @@ void simulate(string filename, restaurant *r)
                 }
             }
 
-            if (currAvailSeat->ID){
-                for (int i = 0; i < stoi(arr[3]); i++){
-                    currAvailSeat->name = arr[1];
-                    currAvailSeat->age = stoi(arr[2]);
-                    currAvailSeat = currAvailSeat->next;
+            table *temp = currAvailSeat;
+            table *delNode = currAvailSeat->next;
+            if (currAvailSeat->ID)
+            {
+                currAvailSeat->name = arr[1];
+                currAvailSeat->age = stoi(arr[2]);
+                for (int i = 0; i < stoi(arr[3]); i++)
+                {
+                    // currAvailSeat->name = arr[1];
+                    // currAvailSeat->age = stoi(arr[2]);
+                    if (i != 1)
+                    {
+                        if (currAvailSeat->ID == MAXSIZE)
+                        {
+                            r->recentTable = temp;
+                        }
+                    }
+                    if (i != stoi(arr[3]) - 1)
+                        currAvailSeat = currAvailSeat->next;
                 }
+                temp->next = currAvailSeat->next;
+                currAvailSeat->next = nullptr;
+                delete delNode;
             }
+            merge_num = stoi(arr[3]);
+            merge_id = temp->ID;
             merge = true;
         }
         else if (arr[0] == "CLE")
         {
             table *temp = r->recentTable->next;
             int index = stoi(arr[1]);
-            int i = 1;
 
+            if (merge)
+            {
+                table *temp1 = r->recentTable;
+                if (index >= merge_id && index < merge_id + merge_num)
+                {
+                    int j = 1;
+                    while (temp1->ID != merge_id)
+                    {
+                        temp1 = temp1->next;
+                    }
+                    temp1->name = "";
+                    temp1->age = 0;
+                    for (int i = 1; i < merge_num; i++)
+                    {
+                        table *newNode;
+                        if (temp1->ID < 15)
+                            newNode = new table(temp1->ID + 1, "", 0, nullptr);
+                        else
+                        {
+                            newNode = new table(j, "", 0, nullptr);
+                            j++;
+                        }
+                        newNode->next = temp1->next;
+                        temp1->next = newNode;
+                        temp1 = newNode;
+                        if (temp1->ID == 15)
+                        {
+                            r->recentTable = temp1;
+                        }
+                    }
+                }
+                continue;
+            }
+
+            int i = 1;
             while (i != index)
             {
                 temp = temp->next;
@@ -270,7 +330,6 @@ void simulate(string filename, restaurant *r)
                         }
                         tmp2 = tmp2->next;
                     }
-
                     delete delNode;
                 }
                 else
@@ -278,10 +337,6 @@ void simulate(string filename, restaurant *r)
                     temp->name = "";
                     temp->age = 0;
                 }
-            }
-
-            if (merge == true)
-            {
             }
         }
         else if (arr[0] == "PS")
