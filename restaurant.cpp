@@ -185,40 +185,35 @@ void simulate(string filename, restaurant *r)
             table *tmp = r->recentTable->next;
             table *pos = tmp;
             int i = 1;
+            int j = 0;
             table *currAvailSeat = new table(0, "", 0, NULL);
-
-            while (tmp != r->recentTable)
-            {
-                if (i == stoi(arr[1]))
-                {
-                    if (tmp->ID > currAvailSeat->ID)
-                    {
+            
+            while(i <= MAXSIZE){
+                if (j == stoi(arr[3])){
+                    if (tmp->ID > currAvailSeat->ID){
                         currAvailSeat = tmp;
                     }
                     tmp = tmp->next;
+                    i++;
                     pos = tmp;
-                    i = 1;
+                    j = 0;
                 }
-                else
-                {
-                    if (pos->name == "")
-                    {
+                else{
+                    if (pos->name == ""){
                         pos = pos->next;
-                        i++;
+                        j++;
                     }
-                    else
-                    {
-                        tmp = pos->next;
+                    else{
+                        tmp = tmp->next;
+                        i++;
                         pos = tmp;
-                        i = 1;
+                        j = 0;
                     }
                 }
             }
 
-            if (currAvailSeat->ID)
-            {
-                for (int i = 0; i < stoi(arr[1]); i++)
-                {
+            if (currAvailSeat->ID){
+                for (int i = 0; i < stoi(arr[3]); i++){
                     currAvailSeat->name = arr[1];
                     currAvailSeat->age = stoi(arr[2]);
                     currAvailSeat = currAvailSeat->next;
