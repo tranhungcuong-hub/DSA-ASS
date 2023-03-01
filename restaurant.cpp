@@ -88,6 +88,7 @@ void simulate(string filename, restaurant *r)
     bool merge = false;
     int merge_num = 0;
     int merge_id = 0;
+    int size = 0;
 
     // Queue
     restaurant *queue = new restaurant();
@@ -98,7 +99,7 @@ void simulate(string filename, restaurant *r)
     // Print PQ queue
     restaurant *print_queue2 = new restaurant();
 
-    ifstream file("test.txt");
+    ifstream file("test2.txt");
 
     while (getline(file, row))
     {
@@ -114,7 +115,7 @@ void simulate(string filename, restaurant *r)
             {
                 int i = 1;
                 int index = stoi(arr[1]);
-                while (true)
+                while (i <= MAXSIZE)
                 {
                     if (i == index)
                     {
@@ -163,17 +164,18 @@ void simulate(string filename, restaurant *r)
                     temp = temp->next;
                     i++;
                 }
+                size++;
             }
             if (isBooked1 == false && count == 3)
             {
                 queue->recentTable = queue->insert(queue->recentTable, stoi(arr[1]), arr[2], stoi(arr[3]));
-                print_queue1->recentTable = print_queue1->insert(print_queue1->recentTable, temp->ID, arr[2], stoi(arr[3]));
+                print_queue1->recentTable = print_queue1->insert(print_queue1->recentTable, stoi(arr[1]), arr[2], stoi(arr[3]));
                 print_queue2->recentTable = print_queue2->insert(print_queue2->recentTable, stoi(arr[1]), arr[2], stoi(arr[3]));
                 print_queue2->recentTable->name = arr[2];
             }
             if (isBooked2 == false && count == 2)
             {
-                queue->recentTable = queue->insert(queue->recentTable, 0, arr[2], stoi(arr[3]));
+                queue->recentTable = queue->insert(queue->recentTable, 0, arr[1], stoi(arr[2]));
                 print_queue1->recentTable = print_queue1->insert(print_queue1->recentTable, 0, arr[1], stoi(arr[2]));
                 print_queue2->recentTable = print_queue2->insert(print_queue2->recentTable, 0, arr[1], stoi(arr[2]));
                 print_queue2->recentTable->name = arr[1];
@@ -347,7 +349,11 @@ void simulate(string filename, restaurant *r)
                 continue;
             }
             int i = 0;
-            table *temp = print_queue1->recentTable->next;
+            table *temp;
+            if (print_queue1->recentTable->next)
+                temp = print_queue1->recentTable->next;
+            else
+                temp = print_queue1->recentTable;
             // cout << temp->name << endl;
             while (temp != print_queue1->recentTable)
             {
@@ -357,6 +363,7 @@ void simulate(string filename, restaurant *r)
                 i++;
                 temp = temp->next;
             }
+            cout << temp->name << endl;
         }
         else if (arr[0] == "PQ")
         {
@@ -366,7 +373,11 @@ void simulate(string filename, restaurant *r)
                 continue;
             }
             int i = 0;
-            table *temp = print_queue2->recentTable->next;
+            table *temp;
+            if (print_queue2->recentTable->next)
+                temp = print_queue2->recentTable->next;
+            else
+                temp = print_queue2->recentTable;
             while (temp != print_queue2->recentTable)
             {
                 if (i == stoi(arr[1]))
@@ -377,6 +388,7 @@ void simulate(string filename, restaurant *r)
                 i++;
                 temp = temp->next;
             }
+            cout << temp->name << endl;
         }
         else if (arr[0] == "SQ")
         {

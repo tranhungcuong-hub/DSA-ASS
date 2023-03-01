@@ -1,1 +1,18 @@
-REG John 50
+REG 2 Nam 10
+REG Wick 35
+REG 2 Tuan 20
+REG 3 Eddie 45
+REG 7 Duck 34
+REG 5 Epsilon 47
+REG 5 a 47
+REG 5 b 47
+REG 5 c 47
+REG 5 d 47
+REG 5 e 47
+REG 5 f 47
+REG 5 g 47
+REG 5 h 47
+REG 5 i 47
+REG 5 o 40
+PS 16
+PQ 1
