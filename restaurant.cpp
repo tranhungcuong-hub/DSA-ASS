@@ -80,12 +80,6 @@ void selection_sort(restaurant *r, int num)
     }
 }
 
-table *check_merge(table *last, int num)
-{
-    if (num == 0)
-        return last;
-}
-
 void simulate(string filename, restaurant *r)
 {
     string row;
@@ -139,8 +133,9 @@ void simulate(string filename, restaurant *r)
                             isBooked1 = true;
                             temp->age = stoi(arr[3]);
                             temp->name = arr[2];
-                            cout << temp->ID << " " << temp->name << " " << temp->age << endl;
+                            // cout << temp->ID << " " << temp->name << " " << temp->age << endl;
                             print_queue1->recentTable = print_queue1->insert(print_queue1->recentTable, temp->ID, temp->name, temp->age);
+                            print_queue1->recentTable->name = temp->name;
                             break;
                         }
                     }
@@ -158,9 +153,10 @@ void simulate(string filename, restaurant *r)
                     {
                         temp->age = stoi(arr[2]);
                         temp->name = arr[1];
+                        // cout << r->recentTable->next->name << r->recentTable->next->age << endl;
                         isBooked2 = true;
-                        cout << temp->ID << " " << temp->name << " " << temp->age << endl;
-                        print_queue1->recentTable = print_queue1->insert(print_queue1->recentTable, temp->ID, temp->name, temp->age);
+                        print_queue1->recentTable = print_queue1->insert(print_queue1->recentTable, 0, temp->name, temp->age);
+                        print_queue1->recentTable->name = temp->name;
                         break;
                     }
                     temp = temp->next;
@@ -172,42 +168,63 @@ void simulate(string filename, restaurant *r)
                 queue->recentTable = queue->insert(queue->recentTable, stoi(arr[1]), arr[2], stoi(arr[3]));
                 print_queue1->recentTable = print_queue1->insert(print_queue1->recentTable, temp->ID, arr[2], stoi(arr[3]));
                 print_queue2->recentTable = print_queue2->insert(print_queue2->recentTable, stoi(arr[1]), arr[2], stoi(arr[3]));
+                print_queue2->recentTable->name = arr[2];
             }
             if (isBooked2 == false && count == 2)
             {
                 queue->recentTable = queue->insert(queue->recentTable, 0, arr[2], stoi(arr[3]));
                 print_queue1->recentTable = print_queue1->insert(print_queue1->recentTable, 0, arr[1], stoi(arr[2]));
                 print_queue2->recentTable = print_queue2->insert(print_queue2->recentTable, 0, arr[1], stoi(arr[2]));
+                print_queue2->recentTable->name = arr[1];
             }
         }
         else if (arr[0] == "REGM")
         {
             if (merge)
                 continue;
-            if (r->recentTable->name == "")
+            table *tmp = r->recentTable->next;
+            table *pos = tmp;
+            int i = 1;
+            table *currAvailSeat = new table(0, "", 0, NULL);
+
+            while (tmp != r->recentTable)
             {
-                merge_num++;
-            }
-            table *temp = r->recentTable->next;
-            table *tmp = temp;
-            while (temp != r->recentTable)
-            {
-                if (merge_num < stoi(arr[1]) && temp->name != "")
+                if (i == stoi(arr[1]))
                 {
-                    merge_num = 0;
-                    tmp = temp;
+                    if (tmp->ID > currAvailSeat->ID)
+                    {
+                        currAvailSeat = tmp;
+                    }
+                    tmp = tmp->next;
+                    pos = tmp;
+                    i = 1;
                 }
-
-                merge_num++;
-
-                if (merge_num == stoi(arr[1]))
-                    break;
-
-                temp = temp->next;
+                else
+                {
+                    if (pos->name == "")
+                    {
+                        pos = pos->next;
+                        i++;
+                    }
+                    else
+                    {
+                        tmp = pos->next;
+                        pos = tmp;
+                        i = 1;
+                    }
+                }
             }
-            if (merge_num == stoi(arr[1]))
+
+            if (currAvailSeat->ID)
             {
+                for (int i = 0; i < stoi(arr[1]); i++)
+                {
+                    currAvailSeat->name = arr[1];
+                    currAvailSeat->age = stoi(arr[2]);
+                    currAvailSeat = currAvailSeat->next;
+                }
             }
+            merge = true;
         }
         else if (arr[0] == "CLE")
         {
@@ -281,11 +298,10 @@ void simulate(string filename, restaurant *r)
             }
             int i = 0;
             table *temp = print_queue1->recentTable->next;
+            // cout << temp->name << endl;
             while (temp != print_queue1->recentTable)
             {
                 if (i == stoi(arr[1]))
-                    break;
-                if (temp->name == "")
                     break;
                 cout << temp->name << endl;
                 i++;
@@ -294,7 +310,7 @@ void simulate(string filename, restaurant *r)
         }
         else if (arr[0] == "PQ")
         {
-            if (print_queue2 == nullptr)
+            if (print_queue2->recentTable == nullptr)
             {
                 cout << "Empty" << endl;
                 continue;
@@ -303,7 +319,7 @@ void simulate(string filename, restaurant *r)
             table *temp = print_queue2->recentTable->next;
             while (temp != print_queue2->recentTable)
             {
-                if (i == stoi(arr[1]) || temp->name == "")
+                if (i == stoi(arr[1]))
                 {
                     break;
                 }
@@ -329,6 +345,16 @@ void simulate(string filename, restaurant *r)
                 }
                 cout << temp->name << endl;
             }
+        }
+        else if (arr[0] == "PRINT")
+        {
+            table *temp = r->recentTable->next;
+            while (temp != r->recentTable)
+            {
+                cout << "[" << temp->ID << " " << temp->name << " " << temp->age << "]->";
+                temp = temp->next;
+            }
+            cout << "[" << temp->ID << " " << temp->name << " " << temp->age << "]->[]" << endl;
         }
     }
     file.close();

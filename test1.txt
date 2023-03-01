@@ -1,1 +1,1 @@
-SQ 2
+REG John 50
