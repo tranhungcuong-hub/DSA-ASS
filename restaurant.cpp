@@ -4,7 +4,8 @@ string *split_string(string str, int &num)
 {
     string *arr = new string[4];
     int count = 0;
-    for (int i = 0; i < str.length(); i++)
+    int n = str.length();
+    for (int i = 0; i < n; i++)
     {
         if (str[i] == ' ')
         {
@@ -99,7 +100,7 @@ void simulate(string filename, restaurant *r)
     // Print PQ queue
     restaurant *print_queue2 = new restaurant();
 
-    ifstream file("test2.txt");
+    ifstream file(filename);
 
     while (getline(file, row))
     {
@@ -113,6 +114,8 @@ void simulate(string filename, restaurant *r)
             // Booking with ID
             if (count == 3)
             {
+                if (stoi(arr[3]) <= 16)
+                    continue;
                 int i = 1;
                 int index = stoi(arr[1]);
                 while (i <= MAXSIZE)
@@ -135,9 +138,15 @@ void simulate(string filename, restaurant *r)
                             isBooked1 = true;
                             temp->age = stoi(arr[3]);
                             temp->name = arr[2];
-                            // cout << temp->ID << " " << temp->name << " " << temp->age << endl;
-                            print_queue1->recentTable = print_queue1->insert(print_queue1->recentTable, temp->ID, temp->name, temp->age);
-                            print_queue1->recentTable->name = temp->name;
+                            if (!print_queue1->recentTable)
+                            {
+                                print_queue1->recentTable = print_queue1->finsert(print_queue1->recentTable, temp->ID, temp->name, temp->age);
+                                print_queue1->recentTable->name = temp->name;
+                            }
+                            else
+                            {
+                                print_queue1->recentTable->next = new table(temp->ID, temp->name, temp->age, print_queue1->recentTable->next);
+                            }
                             break;
                         }
                     }
@@ -148,6 +157,8 @@ void simulate(string filename, restaurant *r)
             // Booking without ID
             else if (count == 2)
             {
+                if (stoi(arr[2]) <= 16)
+                    continue;
                 int i = 1;
                 while (i <= MAXSIZE)
                 {
@@ -157,8 +168,15 @@ void simulate(string filename, restaurant *r)
                         temp->name = arr[1];
                         // cout << r->recentTable->next->name << r->recentTable->next->age << endl;
                         isBooked2 = true;
-                        print_queue1->recentTable = print_queue1->insert(print_queue1->recentTable, 0, temp->name, temp->age);
-                        print_queue1->recentTable->name = temp->name;
+                        if (!print_queue1->recentTable)
+                        {
+                            print_queue1->recentTable = print_queue1->finsert(print_queue1->recentTable, 0, temp->name, temp->age);
+                            print_queue1->recentTable->name = temp->name;
+                        }
+                        else
+                        {
+                            print_queue1->recentTable->next = new table(0, temp->name, temp->age, print_queue1->recentTable->next);
+                        }
                         break;
                     }
                     temp = temp->next;
@@ -169,14 +187,14 @@ void simulate(string filename, restaurant *r)
             if (isBooked1 == false && count == 3)
             {
                 queue->recentTable = queue->insert(queue->recentTable, stoi(arr[1]), arr[2], stoi(arr[3]));
-                print_queue1->recentTable = print_queue1->insert(print_queue1->recentTable, stoi(arr[1]), arr[2], stoi(arr[3]));
+                print_queue1->recentTable->next = new table(stoi(arr[1]), arr[2], stoi(arr[3]), print_queue1->recentTable->next);
                 print_queue2->recentTable = print_queue2->insert(print_queue2->recentTable, stoi(arr[1]), arr[2], stoi(arr[3]));
                 print_queue2->recentTable->name = arr[2];
             }
             if (isBooked2 == false && count == 2)
             {
                 queue->recentTable = queue->insert(queue->recentTable, 0, arr[1], stoi(arr[2]));
-                print_queue1->recentTable = print_queue1->insert(print_queue1->recentTable, 0, arr[1], stoi(arr[2]));
+                print_queue1->recentTable->next = new table(0, arr[2], stoi(arr[3]), print_queue1->recentTable->next);
                 print_queue2->recentTable = print_queue2->insert(print_queue2->recentTable, 0, arr[1], stoi(arr[2]));
                 print_queue2->recentTable->name = arr[1];
             }
@@ -229,14 +247,10 @@ void simulate(string filename, restaurant *r)
                 currAvailSeat->age = stoi(arr[2]);
                 for (int i = 0; i < stoi(arr[3]); i++)
                 {
-                    // currAvailSeat->name = arr[1];
-                    // currAvailSeat->age = stoi(arr[2]);
-                    if (i != 1)
+
+                    if (currAvailSeat->ID == MAXSIZE)
                     {
-                        if (currAvailSeat->ID == MAXSIZE)
-                        {
-                            r->recentTable = temp;
-                        }
+                        r->recentTable = temp;
                     }
                     if (i != stoi(arr[3]) - 1)
                         currAvailSeat = currAvailSeat->next;
@@ -306,36 +320,114 @@ void simulate(string filename, restaurant *r)
                     temp->name = delNode->name;
                     temp->age = delNode->age;
 
-                    table *tmp1 = print_queue1->recentTable->next;
-                    while (tmp1 != print_queue1->recentTable)
+                    if (print_queue1->recentTable)
                     {
-                        if (tmp1->next->name == delNode->name)
+                        table *tmp1 = print_queue1->recentTable->next;
+                        if (tmp1->name == delNode->name)
                         {
-                            table *node = tmp1->next;
-                            tmp1->next = node->next;
-                            node->next = nullptr;
-                            delete node;
-                            break;
+                            print_queue1->recentTable->next = tmp1->next;
+                            tmp1->next = nullptr;
+                            delete tmp1;
                         }
-                        tmp1 = tmp1->next;
+                        else
+                        {
+                            while (tmp1 != print_queue1->recentTable)
+                            {
+                                if (tmp1->next->name == delNode->name)
+                                {
+                                    table *node = tmp1->next;
+                                    tmp1->next = node->next;
+                                    node->next = nullptr;
+                                    delete node;
+                                    break;
+                                }
+                                tmp1 = tmp1->next;
+                            }
+                        }
                     }
-                    table *tmp2 = print_queue2->recentTable->next;
-                    while (tmp2 != print_queue2->recentTable)
+
+                    if (print_queue2->recentTable)
                     {
-                        if (tmp2->next->name == delNode->name)
+                        table *tmp2 = print_queue2->recentTable->next;
+                        if (tmp2->name == delNode->name)
                         {
-                            table *node = tmp2->next;
-                            tmp2->next = node->next;
-                            node->next = nullptr;
-                            delete node;
-                            break;
+                            print_queue2->recentTable->next = tmp2->next;
+                            tmp2->next = nullptr;
+                            delete tmp2;
                         }
-                        tmp2 = tmp2->next;
+                        else
+                        {
+                            while (tmp2 != print_queue2->recentTable)
+                            {
+                                if (tmp2->next->name == delNode->name)
+                                {
+                                    table *node = tmp2->next;
+                                    tmp2->next = node->next;
+                                    node->next = nullptr;
+                                    delete node;
+                                    break;
+                                }
+                                tmp2 = tmp2->next;
+                            }
+                        }
                     }
+
                     delete delNode;
                 }
                 else
                 {
+                    if (print_queue1->recentTable)
+                    {
+                        table *tmp1 = print_queue1->recentTable->next;
+                        if (tmp1->name == temp->name)
+                        {
+                            print_queue1->recentTable->next = tmp1->next;
+                            tmp1->next = nullptr;
+                            delete tmp1;
+                        }
+                        else
+                        {
+                            while (tmp1 != print_queue1->recentTable)
+                            {
+                                if (tmp1->next->name == temp->name)
+                                {
+                                    table *node = tmp1->next;
+                                    tmp1->next = node->next;
+                                    node->next = nullptr;
+                                    delete node;
+                                    break;
+                                }
+                                tmp1 = tmp1->next;
+                            }
+                        }
+                    }
+
+                    if (print_queue2->recentTable)
+                    {
+                        table *tmp2 = print_queue2->recentTable->next;
+                        if (tmp2->name == temp->name)
+                        {
+                            print_queue2->recentTable->next = tmp2->next;
+                            tmp2->next = nullptr;
+                            delete tmp2;
+                        }
+                        else
+                        {
+                            while (tmp2 != print_queue2->recentTable)
+                            {
+                                if (tmp2->next->name == temp->name)
+                                {
+                                    table *node = tmp2->next;
+                                    tmp2->next = node->next;
+                                    node->next = nullptr;
+                                    delete node;
+                                    break;
+                                }
+                                tmp2 = tmp2->next;
+                            }
+                        }
+                    }
+
                     temp->name = "";
                     temp->age = 0;
                 }
@@ -363,7 +455,8 @@ void simulate(string filename, restaurant *r)
                 i++;
                 temp = temp->next;
             }
-            cout << temp->name << endl;
+            if (temp == print_queue1->recentTable && i == stoi(arr[1]))
+                cout << temp->name << endl;
         }
         else if (arr[0] == "PQ")
         {
