@@ -4,11 +4,9 @@ REG Wick 35
 REG 2 Tuan 20
 REG 3 Eddie 45
 REGM Cuong 20 4
-PT
 REG 7 Duck 34
 REG 5 Epsilon 47
 CLE 5
-PT
 PS 4
 CLE 3
 PQ 3

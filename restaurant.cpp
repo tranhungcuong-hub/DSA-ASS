@@ -276,6 +276,8 @@ void simulate(string filename, restaurant *r)
             changeID = temp->ID;
             changeName = temp->name;
 
+            print_queue1->recentTable->next = new table(temp->ID, temp->name, temp->age, print_queue1->recentTable->next);
+
             merge = true;
         }
         else if (arr[0] == "CLE")
@@ -283,43 +285,44 @@ void simulate(string filename, restaurant *r)
             table *temp = r->recentTable->next;
             int index = stoi(arr[1]);
 
-            if (merge)
+            // if (merge)
+            // {
+            if (merge && (index >= merge_id && index < merge_id + merge_num))
             {
                 table *temp1 = r->recentTable;
-                if (index >= merge_id && index < merge_id + merge_num)
+                int j = 1;
+                while (temp1->ID != merge_id)
                 {
-                    int j = 1;
-                    while (temp1->ID != merge_id)
+                    temp1 = temp1->next;
+                }
+
+                changeID = merge_id;
+                changeName = temp1->name;
+
+                temp1->name = "";
+                temp1->age = 0;
+                for (int i = 1; i < merge_num; i++)
+                {
+                    table *newNode;
+                    if (temp1->ID < 15)
+                        newNode = new table(temp1->ID + 1, "", 0, nullptr);
+                    else
                     {
-                        temp1 = temp1->next;
+                        newNode = new table(j, "", 0, nullptr);
+                        j++;
                     }
-
-                    changeID = merge_id;
-                    changeName = temp1->name;
-
-                    temp1->name = "";
-                    temp1->age = 0;
-                    for (int i = 1; i < merge_num; i++)
+                    newNode->next = temp1->next;
+                    temp1->next = newNode;
+                    temp1 = newNode;
+                    if (temp1->ID == 15)
                     {
-                        table *newNode;
-                        if (temp1->ID < 15)
-                            newNode = new table(temp1->ID + 1, "", 0, nullptr);
-                        else
-                        {
-                            newNode = new table(j, "", 0, nullptr);
-                            j++;
-                        }
-                        newNode->next = temp1->next;
-                        temp1->next = newNode;
-                        temp1 = newNode;
-                        if (temp1->ID == 15)
-                        {
-                            r->recentTable = temp1;
-                        }
+                        r->recentTable = temp1;
                     }
                 }
+                merge = false;
                 continue;
             }
+            // }
 
             int i = 1;
             while (i != index)
@@ -328,7 +331,7 @@ void simulate(string filename, restaurant *r)
                 i++;
             }
 
-            if (temp->name != "" && merge == false)
+            if (temp->name != "")
             {
                 changeID = temp->ID;
                 changeName = temp->name;
@@ -557,6 +560,7 @@ void simulate(string filename, restaurant *r)
             }
             cout << "[" << temp->ID << " " << temp->name << " " << temp->age << "]->[]" << endl;
         }
+        delete[] arr;
     }
     delete queue;
     delete print_queue1;
