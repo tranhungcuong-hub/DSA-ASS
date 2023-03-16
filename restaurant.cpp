@@ -3,6 +3,9 @@
 string *split_string(string str, int &num)
 {
     string *arr = new string[4];
+    arr[1] = "";
+    arr[2] = "";
+    arr[3] = "";
     int count = 0;
     int n = str.length();
     for (int i = 0; i < n; i++)
@@ -205,7 +208,7 @@ void simulate(string filename, restaurant *r)
             if (isBooked2 == false && count == 2)
             {
                 queue->recentTable = queue->insert(queue->recentTable, 0, arr[1], stoi(arr[2]));
-                print_queue1->recentTable->next = new table(0, arr[2], stoi(arr[3]), print_queue1->recentTable->next);
+                print_queue1->recentTable->next = new table(0, arr[1], stoi(arr[2]), print_queue1->recentTable->next);
                 print_queue2->recentTable = print_queue2->insert(print_queue2->recentTable, 0, arr[1], stoi(arr[2]));
                 print_queue2->recentTable->name = arr[1];
             }
@@ -269,16 +272,17 @@ void simulate(string filename, restaurant *r)
                 temp->next = currAvailSeat->next;
                 currAvailSeat->next = nullptr;
                 delete delNode;
+
+                merge_num = stoi(arr[3]);
+                merge_id = temp->ID;
+
+                changeID = temp->ID;
+                changeName = temp->name;
+
+                print_queue1->recentTable->next = new table(temp->ID, temp->name, temp->age, print_queue1->recentTable->next);
+
+                merge = true;
             }
-            merge_num = stoi(arr[3]);
-            merge_id = temp->ID;
-
-            changeID = temp->ID;
-            changeName = temp->name;
-
-            print_queue1->recentTable->next = new table(temp->ID, temp->name, temp->age, print_queue1->recentTable->next);
-
-            merge = true;
         }
         else if (arr[0] == "CLE")
         {
@@ -289,6 +293,8 @@ void simulate(string filename, restaurant *r)
             // {
             if (merge && (index >= merge_id && index < merge_id + merge_num))
             {
+                merge = false;
+                cout << "is merge: " << merge << endl;
                 table *temp1 = r->recentTable;
                 int j = 1;
                 while (temp1->ID != merge_id)
@@ -319,7 +325,6 @@ void simulate(string filename, restaurant *r)
                         r->recentTable = temp1;
                     }
                 }
-                merge = false;
                 continue;
             }
             // }
@@ -346,30 +351,54 @@ void simulate(string filename, restaurant *r)
                     temp->name = delNode->name;
                     temp->age = delNode->age;
 
+                    cout << temp->name << "-" << temp->age << endl;
+
                     if (print_queue1->recentTable)
                     {
-                        table *tmp1 = print_queue1->recentTable->next;
-                        if (tmp1->name == delNode->name)
+                        if (print_queue1->recentTable->name == temp->name && print_queue1->recentTable->age == temp->age)
                         {
-                            print_queue1->recentTable->next = tmp1->next;
-                            tmp1->next = nullptr;
-                            delete tmp1;
+                            cout << "asdasd" << endl;
+                            table *tmp1 = print_queue1->recentTable->next;
+                            cout << tmp1->name << endl;
+                            while (tmp1->next != print_queue1->recentTable)
+                            {
+                                tmp1 = tmp1->next;
+                            }
+                            table *del = print_queue1->recentTable;
+                            tmp1->next = del->next;
+                            del->next = nullptr;
+                            delete del;
+                            print_queue1->recentTable = tmp1;
                         }
                         else
                         {
-                            while (tmp1 != print_queue1->recentTable)
+                            table *tmp1 = print_queue1->recentTable->next;
+                            cout << "asdasd" << endl;
+                            if (tmp1->name == delNode->name && tmp1->age == delNode->age)
                             {
-                                if (tmp1->next->name == delNode->name)
+                                cout << "cuong" << endl;
+                                print_queue1->recentTable->next = tmp1->next;
+                                tmp1->next = nullptr;
+                                delete tmp1;
+                            }
+                            else
+                            {
+                                cout << "cuong" << endl;
+                                while (tmp1 != print_queue1->recentTable)
                                 {
-                                    table *node = tmp1->next;
-                                    tmp1->next = node->next;
-                                    node->next = nullptr;
-                                    delete node;
-                                    break;
+                                    if (tmp1->next->name == delNode->name && tmp1->next->age == delNode->age)
+                                    {
+                                        table *node = tmp1->next;
+                                        tmp1->next = node->next;
+                                        node->next = nullptr;
+                                        delete node;
+                                        break;
+                                    }
+                                    tmp1 = tmp1->next;
                                 }
-                                tmp1 = tmp1->next;
                             }
                         }
+                        cout << "asdasd" << endl;
                     }
 
                     if (print_queue2->recentTable)
@@ -428,32 +457,6 @@ void simulate(string filename, restaurant *r)
                         }
                     }
 
-                    // if (print_queue2->recentTable)
-                    // {
-                    //     table *tmp2 = print_queue2->recentTable->next;
-                    //     if (tmp2->name == temp->name)
-                    //     {
-                    //         print_queue2->recentTable->next = tmp2->next;
-                    //         tmp2->next = nullptr;
-                    //         delete tmp2;
-                    //     }
-                    //     else
-                    //     {
-                    //         while (tmp2 != print_queue2->recentTable)
-                    //         {
-                    //             if (tmp2->next->name == temp->name)
-                    //             {
-                    //                 table *node = tmp2->next;
-                    //                 tmp2->next = node->next;
-                    //                 node->next = nullptr;
-                    //                 delete node;
-                    //                 break;
-                    //             }
-                    //             tmp2 = tmp2->next;
-                    //         }
-                    //     }
-                    // }
-
                     temp->name = "";
                     temp->age = 0;
                 }
@@ -466,6 +469,7 @@ void simulate(string filename, restaurant *r)
                 cout << "Empty\n";
                 continue;
             }
+            int n = -1;
             int i = 0;
             table *temp;
             if (print_queue1->recentTable->next)
@@ -475,12 +479,16 @@ void simulate(string filename, restaurant *r)
                 cout << print_queue1->recentTable->name << "\n";
                 continue;
             }
+            if (arr[1] != "")
+                n = stoi(arr[1]);
             while (true)
             {
-                if (i == stoi(arr[1]))
+                if (i == n)
                     break;
                 cout << temp->name << "\n";
                 i++;
+                if (temp->next == print_queue1->recentTable->next)
+                    break;
                 temp = temp->next;
             }
         }
@@ -522,12 +530,10 @@ void simulate(string filename, restaurant *r)
                 temp = print_queue2->recentTable;
             while (temp != print_queue2->recentTable)
             {
-                if (i == stoi(arr[1]))
-                {
-                    break;
-                }
                 cout << temp->name << "\n";
                 i++;
+                if (temp->next == print_queue2->recentTable->next)
+                    break;
                 temp = temp->next;
             }
             cout << temp->name << "\n";
@@ -559,6 +565,21 @@ void simulate(string filename, restaurant *r)
                 temp = temp->next;
             }
             cout << "[" << temp->ID << " " << temp->name << " " << temp->age << "]->[]" << endl;
+        }
+        else if (arr[0] == "PRINTPQ")
+        {
+            if (print_queue1->recentTable->next)
+            {
+                table *temp = print_queue1->recentTable->next;
+                while (temp != print_queue1->recentTable)
+                {
+                    cout << "[" << temp->ID << " " << temp->name << " " << temp->age << "]->";
+                    temp = temp->next;
+                }
+                cout << "[" << temp->ID << " " << temp->name << " " << temp->age << "]->[]" << endl;
+            }
+            else
+                cout << "[" << print_queue1->recentTable->ID << " " << print_queue1->recentTable->name << " " << print_queue1->recentTable->age << "]->[]" << endl;
         }
         delete[] arr;
     }

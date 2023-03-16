@@ -1,6 +1,0 @@
-REG 2 Nam 20
-REG Wick 35
-PRINT
-CLE 2
-PRINT
-PT
